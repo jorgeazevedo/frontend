@@ -78,6 +78,7 @@ define([
         rendered             = false,
         slots                = {},
         slotsToRefresh       = [],
+        creativeIDs          = [],
         hasBreakpointChanged = detect.hasCrossedBreakpoint(true),
         breakoutClasses      = [
             'breakout__html',
@@ -251,7 +252,6 @@ define([
             if (!window.googletag) {
                 window.googletag = { cmd: [] };
                 // load the library asynchronously
-                // .js must be added: https://github.com/systemjs/systemjs/issues/528
                 require(['js!googletag.js']);
             }
 
@@ -296,7 +296,7 @@ define([
         },
         lazyLoad = function () {
             if (slots.length === 0) {
-                mediator.off('window:throttledScroll');
+                mediator.off('window:throttledScroll', lazyLoad);
             } else {
                 var scrollTop    = window.pageYOffset,
                     viewportHeight = bonzo.viewport().height,
@@ -406,6 +406,9 @@ define([
             if (event.isEmpty) {
                 removeLabel($slot);
             } else {
+                // Store ads IDs for technical feedback
+                creativeIDs.push(event.creativeId);
+
                 // remove any placeholder ad content
                 $placeholder = $('.ad-slot__content--placeholder', $slot);
                 $adSlotContent = $('#' + slotId + ' div');
@@ -652,6 +655,10 @@ define([
             return config.switches.viewability && !(config.page.hasPageSkin && detect.getBreakpoint() === 'wide');
         },
 
+        getCreativeIDs = function () {
+            return creativeIDs;
+        },
+
         /**
          * Module
          */
@@ -662,6 +669,7 @@ define([
             getSlots:       getSlots,
             // Used privately but exposed only for unit testing
             shouldLazyLoad: shouldLazyLoad,
+            getCreativeIDs: getCreativeIDs,
 
             // testing
             reset: function () {

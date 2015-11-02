@@ -6,7 +6,7 @@ import com.amazonaws.AmazonClientException
 import com.amazonaws.auth._
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.gu.conf.ConfigurationFactory
-import conf.Configuration
+import conf.{Static, Configuration}
 import conf.switches.Switches
 import org.apache.commons.io.IOUtils
 import play.api.Play
@@ -225,7 +225,7 @@ class GuardianConfiguration(val application: String, val webappConfDirectory: St
 
   object facebook {
     lazy val appId = configuration.getMandatoryStringProperty("guardian.page.fbAppId")
-    lazy val imageFallback = "http://static.guim.co.uk/icons/social/og/gu-logo-fallback.png"
+    lazy val imageFallback = Static("images/facebook/fallback-logo.png").path
   }
 
   object ios {
@@ -262,7 +262,6 @@ class GuardianConfiguration(val application: String, val webappConfDirectory: St
     lazy val dfpInlineMerchandisingTagsDataKey = s"$dfpRoot/inline-merchandising-tags-v3.json"
     lazy val dfpPageSkinnedAdUnitsKey = s"$dfpRoot/pageskinned-adunits-v6.json"
     lazy val dfpLineItemsKey = s"$dfpRoot/lineitems-v4.json"
-    lazy val dfpAdFeatureReportKey = s"$dfpRoot/all-ad-features-v4.json"
     lazy val dfpActiveAdUnitListKey = s"$dfpRoot/active-ad-units.csv"
     lazy val dfpCreativeTemplatesKey = s"$dfpRoot/creative-templates.json"
     lazy val topAboveNavSlotTakeoversKey = s"$dfpRoot/top-above-nav-slot-takeovers-v1.json"
