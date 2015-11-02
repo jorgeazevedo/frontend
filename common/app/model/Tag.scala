@@ -1,6 +1,6 @@
 package model
 
-import com.gu.contentapi.client.model.{Tag => ApiTag, Podcast}
+import com.gu.contentapi.client.model.v1.{Tag => ApiTag, Podcast}
 import common.{Pagination, Reference}
 import conf.Configuration
 import contentapi.SectionTagLookUp

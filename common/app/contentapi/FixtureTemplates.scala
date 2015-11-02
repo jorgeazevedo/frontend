@@ -1,6 +1,6 @@
 package contentapi
 
-import com.gu.contentapi.client.model.{Asset => ApiAsset, Content => ApiContent, Element => ApiElement, Tag => ApiTag}
+import com.gu.contentapi.client.model.v1.{Asset => ApiAsset, Content => ApiContent, Element => ApiElement, Tag => ApiTag}
 
 /** Quite often we base tests on pieces of content from Content API, where we only care that a few of the fields are
   * set.

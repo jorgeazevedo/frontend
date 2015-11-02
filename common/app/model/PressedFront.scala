@@ -1,41 +1,40 @@
 package model.facia
 
-
 import com.gu.facia.api.models.{CuratedContent, _}
 import com.gu.facia.api.utils._
 import implicits.CollectionsOps._
 import org.joda.time.DateTime
 import play.api.libs.json._
 import services.CollectionConfigWithId
-import com.gu.contentapi.client.model._
+import com.gu.contentapi.client.model.v1._
 import implicits.FaciaContentImplicits._
 
 object FapiJsonFormats {
   /* Content API Formats */
-  implicit val contentApiReferenceFormat = Json.format[Reference]
-  implicit val contentApiPodcastFormat = Json.format[Podcast]
-  implicit val contentApiTagFormat = Json.format[Tag]
-  implicit val contentApiAssetFormat = Json.format[Asset]
-  implicit val contentApiElementFormat = Json.format[Element]
-  implicit val contentApiUserFormat = Json.format[User]
-  implicit val contentApiAssetTypeDataFormat = Json.format[AssetTypeData]
-  implicit val contentApiVideoTypeDataFormat = Json.format[VideoTypeData]
-  implicit val contentApiTweetTypeDataFormat = Json.format[TweetTypeData]
-  implicit val contentApiImageTypeDataFormat = Json.format[ImageTypeData]
-  implicit val contentApiAudioTypeDataFormat = Json.format[AudioTypeData]
-  implicit val contentApiPullquoteTypeDataFormat = Json.format[PullquoteTypeData]
-  implicit val contentApiTextTypeDataFormat = Json.format[TextTypeData]
-  implicit val contentApiBlockAssetFormat = Json.format[BlockAsset]
-  implicit val contentApiBlockElementFormat = Json.format[BlockElement]
-  implicit val contentApiBlockFormat = Json.format[Block]
-  implicit val contentApiBlocksFormat = Json.format[Blocks]
-  implicit val contentApiRightsFormat = Json.format[Rights]
-  implicit val contentApiCrosswordDimensionsFormat = Json.format[CrosswordDimensions]
-  implicit val contentApiCrosswordPositionFormat = Json.format[CrosswordPosition]
-  implicit val contentApiCrosswordEntryFormat = Json.format[CrosswordEntry]
-  implicit val contentApiCrosswordCreatorFormat = Json.format[CrosswordCreator]
-  implicit val contentApiCrosswordFormat = Json.format[Crossword]
-  implicit val contentApiContentFormat = Json.format[Content]
+//  implicit val contentApiReferenceFormat = Json.format[Reference]
+//  implicit val contentApiPodcastFormat = Json.format[Podcast]
+//  implicit val contentApiTagFormat = Json.format[Tag]
+//  implicit val contentApiAssetFormat = Json.format[Asset]
+//  implicit val contentApiElementFormat = Json.format[Element]
+//  implicit val contentApiUserFormat = Json.format[User]
+//  implicit val contentApiAssetTypeDataFormat = Json.format[AssetType]
+////  implicit val contentApiVideoTypeDataFormat = Json.format[VideoTypeData]
+////  implicit val contentApiTweetTypeDataFormat = Json.format[TweetTypeData]
+////  implicit val contentApiImageTypeDataFormat = Json.format[ImageTypeData]
+////  implicit val contentApiAudioTypeDataFormat = Json.format[AudioTypeData]
+////  implicit val contentApiPullquoteTypeDataFormat = Json.format[PullquoteTypeData]
+////  implicit val contentApiTextTypeDataFormat = Json.format[TextTypeData]
+////  implicit val contentApiBlockAssetFormat = Json.format[BlockAsset]
+////  implicit val contentApiBlockElementFormat = Json.format[BlockElement]
+//  implicit val contentApiBlockFormat = Json.format[Block]
+//  implicit val contentApiBlocksFormat = Json.format[Blocks]
+//  implicit val contentApiRightsFormat = Json.format[Rights]
+//  implicit val contentApiCrosswordDimensionsFormat = Json.format[CrosswordDimensions]
+//  implicit val contentApiCrosswordPositionFormat = Json.format[CrosswordPosition]
+//  implicit val contentApiCrosswordEntryFormat = Json.format[CrosswordEntry]
+//  implicit val contentApiCrosswordCreatorFormat = Json.format[CrosswordCreator]
+//  implicit val contentApiCrosswordFormat = Json.format[Crossword]
+//  implicit val contentApiContentFormat = Json.format[Content]
 
   implicit val frontImageFormat = Json.format[FrontImage]
   implicit object frontPriorityFormat extends Format[FrontPriority] {

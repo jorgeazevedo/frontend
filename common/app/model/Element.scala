@@ -1,7 +1,7 @@
 package model
 
 import org.joda.time.Duration
-import com.gu.contentapi.client.model.{Element => ApiElement}
+import com.gu.contentapi.client.model.v1.{Element => ApiElement}
 import org.apache.commons.math3.fraction.Fraction
 
 trait Element {

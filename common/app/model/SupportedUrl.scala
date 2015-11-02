@@ -1,6 +1,6 @@
 package model
 
-import com.gu.contentapi.client.model.{ Content => ApiContent, Tag => ApiTag, Section => ApiSection }
+import com.gu.contentapi.client.model.v1.{ Content => ApiContent, Tag => ApiTag, Section => ApiSection }
 import com.gu.facia.api.models._
 import implicits.FaciaContentImplicits._
 

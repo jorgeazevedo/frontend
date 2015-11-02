@@ -1,6 +1,6 @@
 package implicits
 
-import com.gu.contentapi.client.model.Element
+import com.gu.contentapi.client.model.v1.Element
 import com.gu.facia.api.models.{FaciaContent, ImageSlideshow, Replace}
 import common.dfp.DfpAgent
 import implicits.Dates._
