@@ -10,7 +10,7 @@ object FaciaContentImplicits {
   implicit class FaciaContentImplicit(fc: FaciaContent) {
 
     def maybeContent: Option[Content] = FaciaContentUtils.maybeContent(fc)
-    def tags: List[com.gu.contentapi.client.model.Tag] = FaciaContentUtils.tags(fc)
+    def tags: List[com.gu.contentapi.client.model.v1.Tag] = FaciaContentUtils.tags(fc)
     def webPublicationDateOption: Option[DateTime] = FaciaContentUtils.webPublicationDateOption(fc)
     def webPublicationDate: DateTime = FaciaContentUtils.webPublicationDate(fc)
 

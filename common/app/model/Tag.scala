@@ -9,7 +9,7 @@ import views.support.{Contributor, ImgSrc, Item140}
 
 case class Tag(private val delegate: ApiTag, override val pagination: Option[Pagination] = None) extends MetaData with AdSuffixHandlingForFronts {
   lazy val name: String = webTitle
-  lazy val tagType: String = delegate.`type`
+  lazy val tagType: String = delegate.`type`.name
 
   lazy val id: String = delegate.id
 

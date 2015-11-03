@@ -18,7 +18,7 @@ import org.jsoup.safety.Whitelist
 import org.scala_tools.time.Imports._
 import play.api.libs.json._
 import views.support._
-import com.gu.contentapi.client.{model => contentapi}
+import com.gu.contentapi.client.model.{v1 => contentapi}
 
 import scala.collection.JavaConversions._
 import scala.language.postfixOps
