@@ -1,6 +1,6 @@
 package model
 
-import com.gu.contentapi.client.model.{Asset, Content => ApiContent, Element => ApiElement}
+import com.gu.contentapi.client.model.v1.{Asset, Content => ApiContent, Element => ApiElement}
 import contentapi.FixtureTemplates
 import org.joda.time.DateTime
 import org.scalatest.{FlatSpec, Matchers}

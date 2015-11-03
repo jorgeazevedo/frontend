@@ -2,7 +2,7 @@ package model
 
 import java.net.URL
 
-import com.gu.contentapi.client.model.v1.{Asset, Content => ApiContent, Element => ApiElement, Tag => ApiTag}
+import com.gu.contentapi.client.model.v1.{Content => ApiContent, ContentFields}
 import com.gu.facia.api.utils._
 import com.gu.facia.client.models.TrailMetaData
 import com.gu.util.liveblogs.{Parser => LiveBlogParser}
@@ -29,36 +29,36 @@ import scala.util.Try
  */
 class Content protected (val delegate: contentapi.Content) extends Trail with MetaData with ShareLinks {
 
-  lazy val publication: String = fields.getOrElse("publication", "")
-  lazy val lastModified: DateTime = fields.get("lastModified").map(_.parseISODateTime).getOrElse(DateTime.now)
-  lazy val internalPageCode: String = delegate.safeFields("internalPageCode")
-  lazy val shortUrl: String = delegate.safeFields("shortUrl")
-  lazy val shortUrlId: String = delegate.safeFields("shortUrl").replace("http://gu.com", "")
+  lazy val publication: String = fields.flatMap(_.publication).getOrElse("")
+  lazy val lastModified: DateTime = fields.flatMap(_.lastModified).map(_.parseISODateTime).getOrElse(DateTime.now)
+  lazy val internalPageCode: Option[Int] = delegate.fields.flatMap(_.internalPageCode)
+  lazy val shortUrl: String = delegate.fields.flatMap(_.shortUrl).getOrElse("")
+  lazy val shortUrlId: Option[String] = delegate.fields.flatMap(_.shortUrl).map(_.replace("http://gu.com", ""))
   override lazy val webUrl: String = delegate.webUrl
-  lazy val standfirst: Option[String] = fields.get("standfirst")
-  lazy val contributorBio: Option[String] = fields.get("contributorBio")
-  lazy val starRating: Option[Int] = fields.get("starRating").flatMap(s => Try(s.toInt).toOption)
-  lazy val shortUrlPath: String = shortUrl.replace("http://gu.com", "")
-  lazy val allowUserGeneratedContent: Boolean = fields.get("allowUgc").exists(_.toBoolean)
+  lazy val standfirst: Option[String] = fields.flatMap(_.standfirst)
+  lazy val contributorBio: Option[String] = fields.flatMap(_.contributorBio)
+  lazy val starRating: Option[Int] = fields.flatMap(_.starRating).flatMap(s => Try(s.toInt).toOption)
+  lazy val shortUrlPath: Option[String] = shortUrlId
+  lazy val allowUserGeneratedContent: Boolean = fields.flatMap(_.allowUgc)
   lazy val isExpired = delegate.isExpired.getOrElse(false)
   lazy val isBlog: Boolean = blogs.nonEmpty
   lazy val isSeries: Boolean = series.nonEmpty
   lazy val isFromTheObserver: Boolean = publication == "The Observer"
   lazy val primaryKeyWordTag: Option[Tag] = tags.find(!_.isSectionTag)
   lazy val keywordTags: Seq[Tag] = keywords.filter(tag => !tag.isSectionTag)
-  lazy val productionOffice: Option[String] = delegate.safeFields.get("productionOffice")
-  lazy val displayHint: String = fields.getOrElse("displayHint", "")
+  lazy val productionOffice: Option[String] = fields.flatMap(_.productionOffice).map(_.name)
+  lazy val displayHint: String = fields.flatMap(_.displayHint).getOrElse("")
 
   lazy val tweets: Seq[Tweet] = delegate.elements.getOrElse(Nil).filter(_.`type` == "tweet").map{ tweet =>
     val images = tweet.assets.filter(_.`type` == "image").map(_.file).flatten
     Tweet(tweet.id, images)
   }
-  override lazy val membershipAccess: Option[String] = fields.get("membershipAccess")
+  override lazy val membershipAccess: Option[String] = fields.flatMap(_.membershipAccess).map(_.name)
   override lazy val requiresMembershipAccess: Boolean = {
     conf.switches.Switches.MembersAreaSwitch.isSwitchedOn && membershipAccess.nonEmpty && url.contains("/membership/")
   }
 
-  lazy val showInRelated: Boolean = delegate.safeFields.get("showInRelatedContent").contains("true")
+  lazy val showInRelated: Boolean = fields.flatMap(_.showInRelatedContent).getOrElse(false)
   lazy val hasSingleContributor: Boolean = {
     (contributors.headOption, byline) match {
       case (Some(t), Some(b)) => contributors.length == 1 && t.name == b
@@ -102,8 +102,8 @@ class Content protected (val delegate: contentapi.Content) extends Trail with Me
     .orElse(trailPicture.flatMap(largestImageUrl))
     .getOrElse(facebook.imageFallback)
 
-  lazy val shouldHideAdverts: Boolean = fields.get("shouldHideAdverts").exists(_.toBoolean)
-  override lazy val isInappropriateForSponsorship: Boolean = fields.get("isInappropriateForSponsorship").exists(_.toBoolean)
+  lazy val shouldHideAdverts: Boolean = fields.flatMap(_.shouldHideAdverts).getOrElse(false)
+  override lazy val isInappropriateForSponsorship: Boolean = fields.flatMap(_.isInappropriateForSponsorship).getOrElse(false)
 
   lazy val references = delegate.references.map(ref => (ref.`type`, Reference(ref.id)._2)).toMap
 
@@ -127,7 +127,7 @@ class Content protected (val delegate: contentapi.Content) extends Trail with Me
     }
   }
 
-  private lazy val fields: Map[String, String] = delegate.safeFields
+  private lazy val fields: Option[ContentFields] = delegate.fields
 
   // Inherited from Trail
   override lazy val webPublicationDate: DateTime = delegate.webPublicationDateOption.getOrElse(DateTime.now)
@@ -135,13 +135,13 @@ class Content protected (val delegate: contentapi.Content) extends Trail with Me
   override lazy val url: String = SupportedUrl(delegate)
   override lazy val section: String = delegate.sectionId.getOrElse("")
   override lazy val sectionName: String = delegate.sectionName.getOrElse("")
-  override lazy val thumbnailPath: Option[String] = fields.get("thumbnail").map(ImgSrc(_, Naked))
-  override lazy val isLive: Boolean = fields.get("liveBloggingNow").exists(_.toBoolean)
+  override lazy val thumbnailPath: Option[String] = fields.flatMap(_.thumbnail).map(ImgSrc(_, Naked))
+  override lazy val isLive: Boolean = fields.flatMap(_.liveBloggingNow).getOrElse(false)
   override lazy val discussionId = Some(shortUrlPath)
-  override lazy val isCommentable: Boolean = fields.get("commentable").exists(_.toBoolean)
-  override lazy val isClosedForComments: Boolean = !fields.get("commentCloseDate").exists(_.parseISODateTime.isAfterNow)
+  override lazy val isCommentable: Boolean = fields.flatMap(_.commentable).getOrElse(false)
+  override lazy val isClosedForComments: Boolean = !fields.flatMap(_.commentCloseDate).exists(_.parseISODateTime.isAfterNow)
   override lazy val leadingParagraphs: List[org.jsoup.nodes.Element] = {
-    val body = delegate.safeFields.get("body")
+    val body = fields.flatMap(_.body)
     val souped = body flatMap { body =>
       val souped = Jsoup.parseBodyFragment(body).body().select("p")
       Option(souped) map { _.toList }
@@ -151,7 +151,7 @@ class Content protected (val delegate: contentapi.Content) extends Trail with Me
   }
 
   lazy val wordCount: Int = {
-    Jsoup.clean(delegate.safeFields.getOrElse("body",""), Whitelist.none()).split("\\s+").size
+    Jsoup.clean(delegate.fields.flatMap(_.body).getOrElse(""), Whitelist.none()).split("\\s+").size
   }
 
   override lazy val trailType: Option[String] = {
@@ -174,11 +174,11 @@ class Content protected (val delegate: contentapi.Content) extends Trail with Me
   override lazy val description: Option[String] = trailText
 
   // draft content may not have a headline. In that case just go with empty. We expect live content to have a headline
-  override lazy val headline: String = fields.getOrDefault("headline", "")
+  override lazy val headline: String = fields.flatMap(_.headline).getOrElse("")
 
-  override lazy val trailText: Option[String] = fields.get("trailText")
+  override lazy val trailText: Option[String] = fields.flatMap(_.trailText)
   // old bylines can have html http://content.guardianapis.com/commentisfree/2012/nov/10/cocoa-chocolate-fix-under-threat?show-fields=byline
-  override lazy val byline: Option[String] = fields.get("byline").map(stripHtml)
+  override lazy val byline: Option[String] = fields.flatMap(_.byline).map(stripHtml)
   override val showByline = resolvedMetaData.showByline
 
   override def isSurging: Seq[Int] = SurgingContentAgent.getSurgingLevelsFor(id)
@@ -203,14 +203,14 @@ class Content protected (val delegate: contentapi.Content) extends Trail with Me
       ("blogs", JsString(blogs.map { _.name }.mkString(","))),
       ("blogIds", JsString(blogs.map(_.id).mkString(","))),
       ("commentable", JsBoolean(isCommentable)),
-      ("hasStoryPackage", JsBoolean(fields.get("hasStoryPackage").exists(_.toBoolean))),
-      ("pageCode", JsString(fields("internalPageCode"))),
+      ("hasStoryPackage", JsBoolean(fields.flatMap(_.hasStoryPackage).getOrElse(false))),
+      ("pageCode", JsString(fields.flatMap(_.internalPageCode).map(_.toString).getOrElse(""))),
       ("isLive", JsBoolean(isLive)),
       ("isContent", JsBoolean(true)),
       ("wordCount", JsNumber(wordCount)),
-      ("shortUrl", JsString(shortUrl)),
+      ("shortUrl", JsString(fields.flatMap(_.shortUrl).getOrElse(""))),
       ("thumbnail", thumbnailPath.map(JsString.apply).getOrElse(JsBoolean(false))),
-      ("references", JsArray(delegate.references.toSeq.map(ref => Reference.toJavaScript(ref.id)))),
+      ("references", JsArray(delegate.references.map(ref => Reference.toJavaScript(ref.id)))),
       ("sectionName", JsString(sectionName)),
       ("showRelatedContent", JsBoolean(showInRelated)),
       ("productionOffice", JsString(productionOffice.getOrElse("")))
@@ -339,8 +339,8 @@ private object ArticleSchemas {
 }
 
 class Article(delegate: contentapi.Content) extends Content(delegate) with Lightboxable {
-  lazy val main: String = delegate.safeFields.getOrElse("main","")
-  lazy val body: String = delegate.safeFields.getOrElse("body","")
+  lazy val main: String = delegate.fields.flatMap(_.main).getOrElse("")
+  lazy val body: String = delegate.fields.flatMap(_.body).getOrElse("")
   override lazy val contentType = GuardianContentTypes.Article
   override lazy val isImmersive: Boolean = displayHint.contains("immersive")
 
@@ -451,7 +451,7 @@ class LiveBlog(delegate: contentapi.Content) extends Article(delegate) {
 
 abstract class Media(delegate: contentapi.Content) extends Content(delegate) {
 
-  lazy val body: Option[String] = delegate.safeFields.get("body")
+  lazy val body: Option[String] = delegate.fields.flatMap(_.body)
   override def metaData: Map[String, JsValue] = super.metaData ++ Map("isPodcast" -> JsBoolean(isPodcast))
 
   override lazy val analyticsName = s"GFE:$section:$contentType:${id.substring(id.lastIndexOf("/") + 1)}"
@@ -636,7 +636,7 @@ trait Lightboxable extends Content {
 
 class Interactive(delegate: contentapi.Content) extends Content(delegate) {
   override lazy val contentType = GuardianContentTypes.Interactive
-  lazy val body: Option[String] = delegate.safeFields.get("body")
+  lazy val body: Option[String] = delegate.fields.flatMap(_.body)
   override lazy val analyticsName = s"GFE:$section:$contentType:${id.substring(id.lastIndexOf("/") + 1)}"
 
   override lazy val metaData: Map[String, JsValue] = super.metaData + ("contentType" -> JsString(contentType))

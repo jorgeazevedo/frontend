@@ -1,7 +1,7 @@
 package model
 
 import org.joda.time.Duration
-import com.gu.contentapi.client.model.v1.{Element => ApiElement}
+import com.gu.contentapi.client.model.v1.{Element => ApiElement, ElementType}
 import org.apache.commons.math3.fraction.Fraction
 
 trait Element {
@@ -18,10 +18,10 @@ trait Element {
 object Element {
   def apply(theDelegate: ApiElement, elementIndex: Int): Element = {
     theDelegate.`type` match {
-      case "image" => new ImageElement(theDelegate, elementIndex)
-      case "video" => new VideoElement(theDelegate, elementIndex)
-      case "audio" => new AudioElement(theDelegate, elementIndex)
-      case "embed" => new EmbedElement(theDelegate, elementIndex)
+      case ElementType.Image => new ImageElement(theDelegate, elementIndex)
+      case ElementType.Video => new VideoElement(theDelegate, elementIndex)
+      case ElementType.Audio => new AudioElement(theDelegate, elementIndex)
+      case ElementType.Embed => new EmbedElement(theDelegate, elementIndex)
       case _ => new Element{
         lazy val delegate = theDelegate
         lazy val index = elementIndex
@@ -75,7 +75,7 @@ trait VideoContainer extends Element {
 
     val container = images.headOption.map(img => ImageContainer(images, delegate, img.index))
 
-    delegate.assets.filter(_.`type` == "video").map( v => VideoAsset(v, container)).sortBy(-_.width)
+    delegate.assets.filter(_.`type` == "video").map( v => VideoAsset(v, container)).sortBy(-_.width).toList
   }
 
   lazy val blockVideoAds = videoAssets.exists(_.blockVideoAds)
@@ -99,7 +99,7 @@ trait VideoContainer extends Element {
 
 trait AudioContainer extends Element {
   protected implicit val ordering = EncodingOrdering
-  lazy val audioAssets: List[AudioAsset] = delegate.assets.filter(_.`type` == "audio").map( v => AudioAsset(v))
+  lazy val audioAssets: Seq[AudioAsset] = delegate.assets.filter(_.`type` == "audio").map( v => AudioAsset(v))
   lazy val duration: Int = audioAssets.headOption.map(_.duration).getOrElse(0)
   lazy val encodings: Seq[Encoding] = {
     audioAssets.toList.collect {
