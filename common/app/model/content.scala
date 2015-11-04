@@ -30,7 +30,7 @@ import scala.util.Try
 class Content protected (val delegate: contentapi.Content) extends Trail with MetaData with ShareLinks {
 
   lazy val publication: String = fields.flatMap(_.publication).getOrElse("")
-  lazy val lastModified: DateTime = fields.flatMap(_.lastModified).map(_.parseISODateTime).getOrElse(DateTime.now)
+  lazy val lastModified: DateTime = fields.flatMap(_.lastModified).map(new DateTime(_)).map(_.parseISODateTime).getOrElse(DateTime.now)
   lazy val internalPageCode: Option[Int] = delegate.fields.flatMap(_.internalPageCode)
   lazy val shortUrl: String = delegate.fields.flatMap(_.shortUrl).getOrElse("")
   lazy val shortUrlId: Option[String] = delegate.fields.flatMap(_.shortUrl).map(_.replace("http://gu.com", ""))
@@ -130,7 +130,7 @@ class Content protected (val delegate: contentapi.Content) extends Trail with Me
   private lazy val fields: Option[ContentFields] = delegate.fields
 
   // Inherited from Trail
-  override lazy val webPublicationDate: DateTime = delegate.webPublicationDateOption.getOrElse(DateTime.now)
+  override lazy val webPublicationDate: DateTime = delegate.webPublicationDate.map(new DateTime(_)).getOrElse(DateTime.now) // richard
   override lazy val linkText: String = webTitle
   override lazy val url: String = SupportedUrl(delegate)
   override lazy val section: String = delegate.sectionId.getOrElse("")
@@ -139,7 +139,7 @@ class Content protected (val delegate: contentapi.Content) extends Trail with Me
   override lazy val isLive: Boolean = fields.flatMap(_.liveBloggingNow).getOrElse(false)
   override lazy val discussionId = Some(shortUrlPath)
   override lazy val isCommentable: Boolean = fields.flatMap(_.commentable).getOrElse(false)
-  override lazy val isClosedForComments: Boolean = !fields.flatMap(_.commentCloseDate).exists(_.parseISODateTime.isAfterNow)
+  override lazy val isClosedForComments: Boolean = !fields.flatMap(_.commentCloseDate).map(new DateTime(_)).exists(_.isAfterNow) // richard
   override lazy val leadingParagraphs: List[org.jsoup.nodes.Element] = {
     val body = fields.flatMap(_.body)
     val souped = body flatMap { body =>

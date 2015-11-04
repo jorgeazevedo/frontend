@@ -76,17 +76,17 @@ case class AudioAsset(private val delegate: Asset) {
     fields.flatMap(_.durationMinutes).map(_ * 60).getOrElse(0)
 }
 
-case class EmbedAsset(private val delegate: Asset) {
+case class EmbedAsset(private val delegate: Asset) { // richard interactiveElementFields
 
   private lazy val fields: Option[AssetFields] = delegate.typeData
 
-//  lazy val url: Option[String] = delegate.file
-//  lazy val iframeUrl: Option[String] = fields.flatMap(_.iframeUrl)
-//  lazy val scriptName: Option[String] = fields.flatMap(_.scriptName)
-//  lazy val source: Option[String] = fields.flatMap(_.source)
-//  lazy val scriptUrl: Option[String] = fields.flatMap(_.scriptUrl)
-//  lazy val caption: Option[String] = fields.flatMap(_.caption)
-//  lazy val html: Option[String] = fields.flatMap(_.html)
-//  lazy val embedType: Option[String] = fields.flatMap(_.embedType)
-//  lazy val role: Option[String] = fields.flatMap(_.role)
+  lazy val url: Option[String] = delegate.file
+  lazy val iframeUrl: Option[String] = fields.flatMap(_.iframeUrl)
+  lazy val scriptName: Option[String] = fields.flatMap(_.scriptName)
+  lazy val source: Option[String] = fields.flatMap(_.source)
+  lazy val scriptUrl: Option[String] = fields.flatMap(_.scriptUrl)
+  lazy val caption: Option[String] = fields.flatMap(_.caption)
+  lazy val html: Option[String] = fields.flatMap(_.html)
+  lazy val embedType: Option[String] = fields.flatMap(_.embedType)
+  lazy val role: Option[String] = fields.flatMap(_.role)
 }
