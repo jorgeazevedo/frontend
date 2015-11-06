@@ -1,6 +1,6 @@
 package model
 
-import com.gu.contentapi.client.model.{Asset, Content => ApiContent, Element => ApiElement, Tag => ApiTag}
+import com.gu.contentapi.client.model.v1.{Content => ApiContent, Element => ApiElement, Tag => ApiTag, _}
 import common.Edition
 import org.joda.time.DateTime
 import org.scalatest.{FlatSpec, Matchers}
@@ -10,20 +10,20 @@ class ContentTest extends FlatSpec with Matchers with implicits.Dates {
     val imageElement = ApiElement(
       "test-picture",
       "main",
-      "image",
+      ElementType.Image,
       Some(0),
       List(Asset(
-        "image",
+        AssetType.Image,
         Some("image/jpeg"),
         Some("http://www.foo.com/bar"),
-        Map("caption" -> "caption", "width" -> "55"))))
+        Some(AssetFields(caption = Some("caption"), width = Some(55))))))
 
     val elements = List(
       imageElement,
       ApiElement(
         "test-audio",
         "main",
-        "audio",
+        ElementType.Audio,
         Some(0),
         Nil)
     )
@@ -31,7 +31,7 @@ class ContentTest extends FlatSpec with Matchers with implicits.Dates {
     val content = ApiContent(id = "foo/2012/jan/07/bar",
       sectionId = None,
       sectionName = None,
-      webPublicationDateOption = Some(new DateTime),
+      webPublicationDate = Some(DateTime.now().toCapi),
       webTitle = "Some article",
       webUrl = "http://www.guardian.co.uk/foo/2012/jan/07/bar",
       apiUrl = "http://content.guardianapis.com/foo/2012/jan/07/bar",
@@ -89,11 +89,11 @@ class ContentTest extends FlatSpec with Matchers with implicits.Dates {
     val noFields = article.copy(fields = None)
     Content(noFields).isCommentable should be(false)
 
-    val notCommentable= article.copy(fields = Some(Map("commentable" -> "false")))
+    val notCommentable= article.copy(fields = Some(ContentFields(commentable = Some(false))))
     Content(notCommentable).isCommentable should be(false)
 
-    val commentable = article.copy(fields = Some(Map("commentable" -> "true")))
-    commentable.safeFields.get("commentable") should be(Some("true"))
+    val commentable = article.copy(fields = Some(ContentFields(commentable = Some(true))))
+    commentable.fields.flatMap(_.commentable) should be(Some("true"))
     Content(commentable).isCommentable should be(true)
 
   }
@@ -102,17 +102,17 @@ class ContentTest extends FlatSpec with Matchers with implicits.Dates {
     val noFields = article.copy(fields = None)
     Content(noFields).isClosedForComments should be(true)
 
-    val future = new DateTime().plusDays(3).toISODateTimeNoMillisString
-    val openComments= article.copy(fields = Some(Map("commentCloseDate" -> future)))
+    val future = Some(new DateTime().plusDays(3).toCapi)
+    val openComments= article.copy(fields = Some(ContentFields(commentCloseDate = future)))
     Content(openComments).isClosedForComments should be(false)
 
-    val past = new DateTime().minus(3).toISODateTimeNoMillisString
-    val closedComments = article.copy(fields = Some(Map("commentCloseDate" -> past)))
+    val past = Some(new DateTime().minus(3).toCapi)
+    val closedComments = article.copy(fields = Some(ContentFields(commentCloseDate = past)))
     Content(closedComments).isClosedForComments should be(true)
   }
 
   it should "realise that it should not show ads" in {
-    val sensitive = article.copy(fields =  Some(Map("shouldHideAdverts" -> "true")))
+    val sensitive = article.copy(fields =  Some(ContentFields(shouldHideAdverts = Some(true))))
 
     Content(article).shouldHideAdverts should be(false)
     Content(sensitive).shouldHideAdverts should be(true)
@@ -125,12 +125,12 @@ class ContentTest extends FlatSpec with Matchers with implicits.Dates {
     val membershipArticle = ApiContent(id = "membership/2015/jan/01/foo",
       sectionId = None,
       sectionName = None,
-      webPublicationDateOption = Some(new DateTime),
+      webPublicationDate = Some(new DateTime().toCapi),
       webTitle = "Some article",
       webUrl = "http://www.guardian.co.uk/membership/2015/jan/01/foo",
       apiUrl = "http://content.guardianapis.com/membership/2015/jan/01/foo",
       tags = List(tag("type/article")),
-      fields = Some(Map("membershipAccess" -> "members-only")),
+      fields = Some(ContentFields(membershipAccess = Some(MembershipTier.MembersOnly))),
       elements = None
     )
 
@@ -139,13 +139,13 @@ class ContentTest extends FlatSpec with Matchers with implicits.Dates {
     val noAccess = article.copy(fields = None)
     Content(noAccess).requiresMembershipAccess should be(false)
 
-    val outsideMembership = article.copy(fields = Some(Map("membershipAccess" -> "members-only")))
+    val outsideMembership = article.copy(fields = Some(ContentFields(membershipAccess = Some(MembershipTier.MembersOnly))))
     Content(outsideMembership).requiresMembershipAccess should be(false)
 
   }
 
   private def tag(id: String = "/id", tagType: String = "keyword", name: String = "", url: String = "") = {
-    ApiTag(id = id, `type` = tagType, webTitle = name,
+    ApiTag(id = id, `type` = TagType.valueOf(tagType).get, webTitle = name,
       sectionId = None, sectionName = None, webUrl = url, apiUrl = "apiurl", references = Nil)
   }
 
@@ -155,7 +155,7 @@ class ContentTest extends FlatSpec with Matchers with implicits.Dates {
         id = "/content",
         sectionId = None,
         sectionName = None,
-        webPublicationDateOption = Some(DateTime.now),
+        webPublicationDate = Some(DateTime.now().toCapi),
         webTitle = "webTitle",
         webUrl = "webUrl",
         apiUrl = "apiUrl",
@@ -173,10 +173,10 @@ class ContentTest extends FlatSpec with Matchers with implicits.Dates {
                       caption: String,
                       width: Int,
                       index: Int): ApiElement = {
-    ApiElement(id, relation, "image", Some(index), List(asset(caption, width)))
+    ApiElement(id, relation, ElementType.Image, Some(index), List(asset(caption, width)))
   }
 
   private def asset(caption: String, width: Int): Asset = {
-    Asset("image", Some("image/jpeg"), Some("http://www.foo.com/bar"), Map("caption" -> caption, "width" -> width.toString))
+    Asset(AssetType.Image, Some("image/jpeg"), Some("http://www.foo.com/bar"), Some(AssetFields(caption = Some(caption), width = Some(width))))
   }
 }

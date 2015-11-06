@@ -1,6 +1,6 @@
 package common.dfp
 
-import com.gu.contentapi.client.model.{Tag => ApiTag}
+import com.gu.contentapi.client.model.v1.{Tag => ApiTag, TagType => ApiTagType}
 import com.gu.facia.api.models.CollectionConfig
 import com.gu.facia.client.models.CollectionConfigJson
 import common.Edition.defaultEdition
@@ -16,7 +16,7 @@ class PaidForTagAgentTest extends FlatSpec with Matchers {
 
   private def toTag(tagType: String, tagId: String, sectionId: Option[String] = None): Tag = {
     Tag(ApiTag(id = tagId,
-      `type` = tagType,
+      `type` = ApiTagType.valueOf(tagType).get,
       sectionId = sectionId,
       webTitle = "title",
       webUrl = "url",

@@ -1,6 +1,6 @@
 package common
 
-import com.gu.contentapi.client.model.{Content => ApiContent, Tag => ApiTag}
+import com.gu.contentapi.client.model.v1.{Content => ApiContent, Tag => ApiTag, ContentFields, TagType}
 import common.editions.Uk
 import model.Article
 import org.joda.time.DateTime
@@ -12,7 +12,7 @@ import views.support.TagLinker
 
 import scala.collection.JavaConversions._
 
-class TagLinkerTest extends FlatSpec with Matchers {
+class TagLinkerTest extends FlatSpec with Matchers with implicits.Dates {
 
   implicit val edition = Uk
   implicit val request = FakeRequest("GET", "/")
@@ -77,24 +77,24 @@ class TagLinkerTest extends FlatSpec with Matchers {
     cleaned.firstPara should be ("such as Harlem rapper A$AP Rocky")
   }
 
-  private def tag(id: String, name: String) = new ApiTag(id, "keyword", webTitle = name, webUrl = "does not matter",
+  private def tag(id: String, name: String) = ApiTag(id, TagType.Keyword, webTitle = name, webUrl = "does not matter",
     apiUrl = "does not matter", sectionId = Some("does not matter"))
 
   private def sensitiveArticle(tags: ApiTag*) = new Article(
-    article(tags:_*).delegate.copy(fields = Some(Map("showInRelatedContent" -> "false")))
+    article(tags:_*).delegate.copy(fields = Some(ContentFields(showInRelatedContent = Some(false))))
   )
 
   private def article(tags: ApiTag*) = new Article(ApiContent(id = "foo/2012/jan/07/bar",
     sectionId = None,
     sectionName = None,
-    webPublicationDateOption = Some(new DateTime),
+    webPublicationDate = Some(DateTime.now().toCapi),
     webTitle = "Some article",
     webUrl = "http://www.guardian.co.uk/foo/2012/jan/07/bar",
     apiUrl = "http://content.guardianapis.com/foo/2012/jan/07/bar",
     elements = None,
     tags = tags.toList,
-    fields = Some(Map("showInRelatedContent" -> "true"))
-  ))
+    fields = Some(ContentFields(showInRelatedContent = Some(true))
+  )))
 
   private def souped(s: String) = Jsoup.parseBodyFragment(s)
 }

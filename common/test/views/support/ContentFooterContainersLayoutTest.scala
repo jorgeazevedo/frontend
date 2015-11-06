@@ -1,5 +1,6 @@
 package views.support
 
+import com.gu.contentapi.client.model.v1.{ContentFields, TagType}
 import conf.switches.Switches.OutbrainSwitch
 import contentapi.FixtureTemplates.{emptyApiContent, emptyTag}
 import model.{Article, Content, RelatedContent}
@@ -15,14 +16,14 @@ class ContentFooterContainersLayoutTest extends FlatSpec with Matchers {
                           commentable: Boolean = true,
                           seriesId: Option[String] = None,
                           blogId: Option[String] = None): Content = {
-    val seriesTag = for (id <- seriesId) yield emptyTag.copy(id = id, `type` = "series")
-    val blogTag = for (id <- blogId) yield emptyTag.copy(id = id, `type` = "blog")
+    val seriesTag = for (id <- seriesId) yield emptyTag.copy(id = id, `type` = TagType.Series)
+    val blogTag = for (id <- blogId) yield emptyTag.copy(id = id, `type` = TagType.Blog)
     val tags = List(seriesTag, blogTag).flatten
     new Article(emptyApiContent.copy(
-      fields = Some(Map(
-      "showInRelatedContent" -> showInRelatedContent.toString,
-      "shouldHideAdverts" -> shouldHideAdverts.toString,
-      "commentable" -> commentable.toString
+      fields = Some(ContentFields(
+        showInRelatedContent = Some(showInRelatedContent),
+        shouldHideAdverts = Some(shouldHideAdverts),
+        commentable = Some(commentable)
       )),
       tags = tags
     ))

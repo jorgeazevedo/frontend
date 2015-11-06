@@ -1,30 +1,30 @@
 package common
 
-import com.gu.contentapi.client.model.{Content, ItemResponse, Section, Tag}
+import com.gu.contentapi.client.model.ItemResponse
+import com.gu.contentapi.client.model.v1.{TagType, Content, Section, Tag}
 import org.joda.time.DateTime
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.mvc.RequestHeader
 import play.api.test.Helpers._
 import test.TestRequest
-
 import scala.concurrent.Future
 
 private object TestModel
 
-class ModelOrResultTest extends FlatSpec with Matchers with ExecutionContexts {
+class ModelOrResultTest extends FlatSpec with Matchers with ExecutionContexts with implicits.Dates{
 
   implicit val request: RequestHeader = TestRequest()
 
   val testContent = Content(id = "the/id",
     sectionId = None,
     sectionName = None,
-    webPublicationDateOption = Some(new DateTime()),
+    webPublicationDate = Some(DateTime.now().toCapi),
     webTitle = "the title",
     webUrl = "http://www.guardian.co.uk/canonical",
     apiUrl = "http://foo.bar",
     elements = None)
 
-  val articleTag = new Tag("type/article", "type", webTitle = "the title", webUrl = "http://foo.bar", apiUrl = "http://foo.bar")
+  val articleTag = Tag(id = "type/article", `type` = TagType.Blog, webTitle = "the title", webUrl = "http://foo.bar", apiUrl = "http://foo.bar")
   val galleryTag = articleTag.copy(id = "type/gallery")
   val videoTag = articleTag.copy(id = "type/video")
   val audioTag = articleTag.copy(id = "type/audio")
@@ -34,7 +34,7 @@ class ModelOrResultTest extends FlatSpec with Matchers with ExecutionContexts {
   val testVideo = testContent.copy(tags = List(videoTag))
   val testAudio = testContent.copy(tags = List(audioTag))
 
-  val testSection = new Section("water", "Water", "http://foo.bar", "http://foo.bar", Nil)
+  val testSection =  Section("water", "Water", "http://foo.bar", "http://foo.bar", Nil)
 
   // FML
   val stubResponse = new ItemResponse("ok", "top_tier", None, None, None, None, None, None, None, None, None, None, Nil, Nil, Nil, Nil, Nil, Nil)

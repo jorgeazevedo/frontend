@@ -1,6 +1,6 @@
 package views.support
 
-import com.gu.contentapi.client.model.{Asset => ApiAsset, Content => ApiContent, Element => ApiElement, Tag => ApiTag}
+import com.gu.contentapi.client.model.v1.{Asset => ApiAsset, Content => ApiContent, Element => ApiElement, Tag => ApiTag, _}
 import common.Edition
 import common.editions.Uk
 import conf.Configuration
@@ -178,7 +178,7 @@ class TemplatesTest extends FlatSpec with Matchers {
   }
 
   private def tag(name: String = "name", tagType: String = "keyword", id: String = "/id") = {
-    ApiTag(id = id, `type` = tagType, webTitle = name,
+    ApiTag(id = id, `type` = TagType.valueOf(tagType).get, webTitle = name,
       sectionId = None, sectionName = None, webUrl = "weburl", apiUrl = "apiurl", references = Nil)
   }
 
@@ -217,32 +217,32 @@ class TemplatesTest extends FlatSpec with Matchers {
   </span>
                                    """
 
-  private def asset(caption: String, width: Int, height: Int, mediaId: String): ApiAsset = {
-    ApiAsset("image", Some("image/jpeg"), Some("http://www.foo.com/bar"), Map(
-      "caption" -> caption,
-      "width" -> width.toString,
-      "height" -> height.toString,
-      "mediaId" -> mediaId
-    ))
+  private def asset(caption: String, width: Int, height: Int, assetMediaId: String): ApiAsset = {
+    ApiAsset(AssetType.Image, Some("image/jpeg"), Some("http://www.foo.com/bar"), Some(AssetFields(
+      caption = Some(caption),
+      width = Some(width),
+      height = Some(height)
+// TODO     mediaId = Some(assetMediaId)
+    )))
   }
 
   val testImages: List[ApiElement] = List(
-    ApiElement("gu-image-1", "body", "image", Some(0), List(asset("test caption", 140, 100, "gu-image-1"))),
-    ApiElement("gu-image-2", "body", "image", Some(0), List(asset("test caption", 250, 100, "gu-image-2"))),
-    ApiElement("gu-image-3", "body", "image", Some(0), List(asset("test caption", 600, 100, "gu-image-3"))),
-    ApiElement("gu-image-4", "body", "image", Some(0), List(asset("test caption", 500, 100, "gu-image-4"))),
-    ApiElement("gu-image-5", "body", "image", Some(0), List(asset("test caption", 500, 700, "gu-image-5")))
+    ApiElement("gu-image-1", "body", ElementType.Image, Some(0), List(asset("test caption", 140, 100, "gu-image-1"))),
+    ApiElement("gu-image-2", "body", ElementType.Image, Some(0), List(asset("test caption", 250, 100, "gu-image-2"))),
+    ApiElement("gu-image-3", "body", ElementType.Image, Some(0), List(asset("test caption", 600, 100, "gu-image-3"))),
+    ApiElement("gu-image-4", "body", ElementType.Image, Some(0), List(asset("test caption", 500, 100, "gu-image-4"))),
+    ApiElement("gu-image-5", "body", ElementType.Image, Some(0), List(asset("test caption", 500, 700, "gu-image-5")))
   )
 
   val testContent = new Article(ApiContent(
     id = "foo/2012/jan/07/bar",
     sectionId = None,
     sectionName = None,
-    webPublicationDateOption = None,
+    webPublicationDate = None,
     webTitle = "Some article",
     webUrl = "http://www.guardian.co.uk/foo/2012/jan/07/bar",
     apiUrl = "http://content.guardianapis.com/foo/2012/jan/07/bar",
-    fields = Some(Map("shortUrl" -> "http://gu.com/p/439az")),
+    fields = Some(ContentFields(shortUrl = Some("http://gu.com/p/439az"))),
     elements = Some(testImages)
   ))
 

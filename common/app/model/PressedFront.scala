@@ -6,12 +6,25 @@ import implicits.CollectionsOps._
 import org.joda.time.DateTime
 import play.api.libs.json._
 import services.CollectionConfigWithId
-import com.gu.contentapi.client.model.v1._
 import implicits.FaciaContentImplicits._
+import com.gu.contentapi.client.model.v1.Content
 
 object FapiJsonFormats {
   /* Content API Formats */
   implicit val formats  = com.gu.contentapi.client.parser.JsonParser.formats
+
+
+    /*implicit object traitWrites extends OWrites[Content]{
+      def writes(obj: Content)=Json.obj("_1" -> obj._1)
+    }
+  case class Thing(content:Content) extends Content.Proxy
+  {
+    override val _underlying_Content = content
+  }*/
+  implicit object contentApiContentFormat extends Format[Content] {
+    def reads(json:JsValue)= JsError("error")
+    def writes(obj: Content)= Json.obj("_1" -> obj._1)
+  }
 
   implicit val frontImageFormat = Json.format[FrontImage]
   implicit object frontPriorityFormat extends Format[FrontPriority] {
@@ -29,7 +42,7 @@ object FapiJsonFormats {
     }
   }
 
-  implicit val frontFormat = Json.format[Front]
+  implicit val frontFormat = Json.format[com.gu.facia.api.models.Front]
 
   implicit val groupFormat = Json.format[Group]
 
@@ -202,6 +215,7 @@ case class PressedCollection(
 }
 
 object PressedCollection {
+  import FapiJsonFormats._
   implicit val pressedCollectionFormat = Json.format[PressedCollection]
 
   def fromCollectionWithCuratedAndBackfill(
