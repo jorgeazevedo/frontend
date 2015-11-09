@@ -1,6 +1,7 @@
 package layout
 
 import com.gu.contentapi.client.model.v1.{Content => ApiContent}
+import com.gu.contentapi.client.utils.CapiModelEnrichment.RichJodaDateTime
 import com.gu.facia.api.models.{FaciaContent, LatestSnap}
 import com.gu.facia.api.utils._
 import contentapi.FixtureTemplates.emptyApiContent
@@ -11,7 +12,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import services.FaciaContentConvert
 import slices._
 
-class FrontTest extends FlatSpec with Matchers with implicits.Dates {
+class FrontTest extends FlatSpec with Matchers {
   def trailWithUrl(theUrl: String): FaciaContent = FaciaContentConvert.frontendContentToFaciaContent(new Content(
       emptyApiContent.copy(id = theUrl, webUrl = theUrl)
     ) {
@@ -26,7 +27,7 @@ class FrontTest extends FlatSpec with Matchers with implicits.Dates {
       id = theUrl,
       sectionId = None,
       sectionName = None,
-      webPublicationDate = Option(DateTime.now().toCapi),
+      webPublicationDate = Option(DateTime.now().toCapiDateTime),
       webTitle = "",
       webUrl = theUrl,
       apiUrl = "",

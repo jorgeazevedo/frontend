@@ -1,18 +1,19 @@
 package model
 
 import com.gu.contentapi.client.model.v1.{Content => ApiContent, Element => ApiElement, ElementType, AssetFields, AssetType, Asset}
+import com.gu.contentapi.client.utils.CapiModelEnrichment.RichJodaDateTime
 import contentapi.FixtureTemplates
 import org.joda.time.DateTime
 import org.scalatest.{FlatSpec, Matchers}
 
-class ElementsTest extends FlatSpec with Matchers with implicits.Dates {
+class ElementsTest extends FlatSpec with Matchers {
 
   "Elements" should "find the biggest crop of the main picture" in {
     val images: Elements = Content(
       ApiContent(id = "foo/2012/jan/07/bar",
         sectionId = None,
         sectionName = None,
-        webPublicationDate = Some(DateTime.now().toCapi),
+        webPublicationDate = Some(DateTime.now().toCapiDateTime),
         webTitle = "Some article",
         webUrl = "http://www.guardian.co.uk/foo/2012/jan/07/bar",
         apiUrl = "http://content.guardianapis.com/foo/2012/jan/07/bar",

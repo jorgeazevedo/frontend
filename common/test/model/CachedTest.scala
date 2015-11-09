@@ -1,6 +1,7 @@
 package model
 
 import com.gu.contentapi.client.model.v1.{Content => ApiContent, ContentFields}
+import com.gu.contentapi.client.utils.CapiModelEnrichment.RichJodaDateTime
 import conf.switches.Switches
 import conf.switches.Switches.DoubleCacheTimesSwitch
 import org.joda.time.DateTime
@@ -8,7 +9,7 @@ import org.scala_tools.time.Imports._
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.mvc.Results
 
-class CachedTest extends FlatSpec with Matchers with Results with implicits.Dates {
+class CachedTest extends FlatSpec with Matchers with Results {
 
   "Cached" should "cache live content for 5 seconds" in {
     Switches.DoubleCacheTimesSwitch.switchOff()
@@ -110,13 +111,13 @@ class CachedTest extends FlatSpec with Matchers with Results with implicits.Date
     Content(ApiContent(id = "foo/2012/jan/07/bar",
       sectionId = None,
       sectionName = None,
-      webPublicationDate = Some(DateTime.now().toCapi),
+      webPublicationDate = Some(DateTime.now().toCapiDateTime),
       webTitle = "Some article",
       webUrl = "http://www.guardian.co.uk/foo/2012/jan/07/bar",
       apiUrl = "http://content.guardianapis.com/foo/2012/jan/07/bar",
       elements = None,
       fields = Some(ContentFields(
-        lastModified = Some(lastModified.toCapi),
+        lastModified = Some(lastModified.toCapiDateTime),
         liveBloggingNow = Some(live)
       ))
     ))

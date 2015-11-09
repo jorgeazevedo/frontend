@@ -1,6 +1,7 @@
 package common
 
 import com.gu.contentapi.client.model.v1.{Content => ApiContent, Tag => ApiTag, ContentFields, TagType}
+import com.gu.contentapi.client.utils.CapiModelEnrichment.RichJodaDateTime
 import common.editions.Uk
 import model.Article
 import org.joda.time.DateTime
@@ -12,7 +13,7 @@ import views.support.TagLinker
 
 import scala.collection.JavaConversions._
 
-class TagLinkerTest extends FlatSpec with Matchers with implicits.Dates {
+class TagLinkerTest extends FlatSpec with Matchers {
 
   implicit val edition = Uk
   implicit val request = FakeRequest("GET", "/")
@@ -87,7 +88,7 @@ class TagLinkerTest extends FlatSpec with Matchers with implicits.Dates {
   private def article(tags: ApiTag*) = new Article(ApiContent(id = "foo/2012/jan/07/bar",
     sectionId = None,
     sectionName = None,
-    webPublicationDate = Some(DateTime.now().toCapi),
+    webPublicationDate = Some(DateTime.now().toCapiDateTime),
     webTitle = "Some article",
     webUrl = "http://www.guardian.co.uk/foo/2012/jan/07/bar",
     apiUrl = "http://content.guardianapis.com/foo/2012/jan/07/bar",

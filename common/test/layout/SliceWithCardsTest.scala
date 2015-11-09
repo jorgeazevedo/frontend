@@ -1,6 +1,7 @@
 package layout
 
 import com.gu.contentapi.client.model.v1.{Content => ApiContent}
+import com.gu.contentapi.client.utils.CapiModelEnrichment.RichJodaDateTime
 import com.gu.facia.api.models.CollectionConfig
 import model.{Content, Trail}
 import org.joda.time.DateTime
@@ -10,14 +11,14 @@ import org.scalatest.{FlatSpec, Matchers}
 import services.FaciaContentConvert
 import slices.DesktopBehaviour
 
-class SliceWithCardsTest extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks with implicits.Dates {
+class SliceWithCardsTest extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {
   val NumberOfFixtures = 40
 
   def nthApiContent(n: Int): ApiContent = ApiContent(
     id = "id",
     sectionId = None,
     sectionName = None,
-    webPublicationDate = Option(DateTime.now().toCapi),
+    webPublicationDate = Option(DateTime.now().toCapiDateTime),
     webTitle = "",
     webUrl = s"$n",
     apiUrl = s"$n",

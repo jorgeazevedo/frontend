@@ -61,15 +61,4 @@ trait Dates {
   implicit class String2Date(s: String) {
     lazy val parseHttpDateTimeString: DateTime = HTTPDateFormat.parseDateTime(s)
   }
-
-  implicit class CapiDateToDateTime(capiDate: CapiDateTime) {
-    implicit val toJoda = new DateTime(capiDate)
-  }
-
-  implicit class DateTimeToCapi(date: DateTime) {
-    implicit val toCapi = new CapiDateTime {
-      override def dateTime: Long = date.getMillis
-    }
-  }
-
 }

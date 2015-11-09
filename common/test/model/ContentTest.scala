@@ -1,11 +1,12 @@
 package model
 
 import com.gu.contentapi.client.model.v1.{Content => ApiContent, Element => ApiElement, Tag => ApiTag, _}
+import com.gu.contentapi.client.utils.CapiModelEnrichment.RichJodaDateTime
 import common.Edition
 import org.joda.time.DateTime
 import org.scalatest.{FlatSpec, Matchers}
 
-class ContentTest extends FlatSpec with Matchers with implicits.Dates {
+class ContentTest extends FlatSpec with Matchers {
   "Trail" should "be populated properly" in {
     val imageElement = ApiElement(
       "test-picture",
@@ -31,7 +32,7 @@ class ContentTest extends FlatSpec with Matchers with implicits.Dates {
     val content = ApiContent(id = "foo/2012/jan/07/bar",
       sectionId = None,
       sectionName = None,
-      webPublicationDate = Some(DateTime.now().toCapi),
+      webPublicationDate = Some(DateTime.now().toCapiDateTime),
       webTitle = "Some article",
       webUrl = "http://www.guardian.co.uk/foo/2012/jan/07/bar",
       apiUrl = "http://content.guardianapis.com/foo/2012/jan/07/bar",
@@ -102,11 +103,11 @@ class ContentTest extends FlatSpec with Matchers with implicits.Dates {
     val noFields = article.copy(fields = None)
     Content(noFields).isClosedForComments should be(true)
 
-    val future = Some(new DateTime().plusDays(3).toCapi)
+    val future = Some(new DateTime().plusDays(3).toCapiDateTime)
     val openComments= article.copy(fields = Some(ContentFields(commentCloseDate = future)))
     Content(openComments).isClosedForComments should be(false)
 
-    val past = Some(new DateTime().minus(3).toCapi)
+    val past = Some(new DateTime().minus(3).toCapiDateTime)
     val closedComments = article.copy(fields = Some(ContentFields(commentCloseDate = past)))
     Content(closedComments).isClosedForComments should be(true)
   }
@@ -125,7 +126,7 @@ class ContentTest extends FlatSpec with Matchers with implicits.Dates {
     val membershipArticle = ApiContent(id = "membership/2015/jan/01/foo",
       sectionId = None,
       sectionName = None,
-      webPublicationDate = Some(new DateTime().toCapi),
+      webPublicationDate = Some(new DateTime().toCapiDateTime),
       webTitle = "Some article",
       webUrl = "http://www.guardian.co.uk/membership/2015/jan/01/foo",
       apiUrl = "http://content.guardianapis.com/membership/2015/jan/01/foo",
@@ -155,7 +156,7 @@ class ContentTest extends FlatSpec with Matchers with implicits.Dates {
         id = "/content",
         sectionId = None,
         sectionName = None,
-        webPublicationDate = Some(DateTime.now().toCapi),
+        webPublicationDate = Some(DateTime.now().toCapiDateTime),
         webTitle = "webTitle",
         webUrl = "webUrl",
         apiUrl = "apiUrl",

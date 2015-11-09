@@ -3,6 +3,7 @@ package model
 import java.net.URL
 
 import com.gu.contentapi.client.model.v1.{Content => ApiContent, ContentFields}
+import com.gu.contentapi.client.utils.CapiModelEnrichment.RichCapiDateTime
 import com.gu.facia.api.utils._
 import com.gu.facia.client.models.TrailMetaData
 import com.gu.util.liveblogs.{Parser => LiveBlogParser}
@@ -30,7 +31,7 @@ import scala.util.Try
 class Content protected (val delegate: contentapi.Content) extends Trail with MetaData with ShareLinks {
 
   lazy val publication: String = fields.flatMap(_.publication).getOrElse("")
-  lazy val lastModified: DateTime = fields.flatMap(_.lastModified).map(_.toJoda).getOrElse(DateTime.now)
+  lazy val lastModified: DateTime = fields.flatMap(_.lastModified).map(_.toJodaDateTime).getOrElse(DateTime.now)
   lazy val internalPageCode: Option[Int] = delegate.fields.flatMap(_.internalPageCode)
   lazy val shortUrl: String = delegate.fields.flatMap(_.shortUrl).getOrElse("")
   lazy val shortUrlId: String = shortUrl.replace("http://gu.com", "")

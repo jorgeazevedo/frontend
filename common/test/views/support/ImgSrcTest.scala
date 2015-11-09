@@ -1,6 +1,7 @@
 package views.support
 
 import com.gu.contentapi.client.model.v1._
+import com.gu.contentapi.client.utils.CapiModelEnrichment.RichJodaDateTime
 import conf.Configuration
 import conf.switches.Switches.ImageServerSwitch
 import model.{ImageAsset, ImageContainer}
@@ -27,7 +28,7 @@ class ImgSrcTest extends FlatSpec with Matchers  {
   val content = Content(id = "foo/2012/jan/07/bar",
     sectionId = None,
     sectionName = None,
-    webPublicationDate = Some(DateTime.now().toCapi),
+    webPublicationDate = Some(DateTime.now().toCapiDateTime),
     webTitle = "Some article",
     webUrl = "http://www.guardian.co.uk/foo/2012/jan/07/bar",
     apiUrl = "http://content.guardianapis.com/foo/2012/jan/07/bar",

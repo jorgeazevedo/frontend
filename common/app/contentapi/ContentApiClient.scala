@@ -2,7 +2,7 @@ package contentapi
 
 import akka.actor.ActorSystem
 import com.gu.contentapi.client.ContentApiClientLogic
-import com.gu.contentapi.client.model.v1.CapiDateTime
+import com.gu.contentapi.client.utils.CapiModelEnrichment.RichCapiDateTime
 import com.gu.contentapi.client.model.{ErrorResponse, ItemQuery, ItemResponse, SearchQuery}
 import common.ContentApiMetrics.ContentApiCircuitBreakerOnOpen
 import conf.switches.Switches
@@ -13,7 +13,6 @@ import org.joda.time.DateTime
 import org.scala_tools.time.Implicits._
 import conf.Configuration.contentApi
 import com.gu.contentapi.client.model.{SearchQuery, ItemQuery, ItemResponse}
-import implicits.Dates._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.{Duration, MILLISECONDS}
@@ -54,7 +53,7 @@ trait QueryDefaults extends implicits.Collections {
         val editorsPicks = r.editorsPicks.map(Content(_))
 
         val leadContent = if (editorsPicks.isEmpty)
-            r.leadContent.filter(_.webPublicationDate.exists(_.toJoda >= leadContentCutOff.toDateTimeAtStartOfDay)).map(Content(_)).take(1) // richard
+            r.leadContent.filter(_.webPublicationDate.exists(_.toJodaDateTime >= leadContentCutOff.toDateTimeAtStartOfDay)).map(Content(_)).take(1)
           else
             Nil
 

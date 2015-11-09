@@ -2,6 +2,7 @@ package common
 
 import com.gu.contentapi.client.model.ItemResponse
 import com.gu.contentapi.client.model.v1.{TagType, Content, Section, Tag}
+import com.gu.contentapi.client.utils.CapiModelEnrichment.RichJodaDateTime
 import org.joda.time.DateTime
 import org.scalatest.{FlatSpec, Matchers}
 import play.api.mvc.RequestHeader
@@ -11,14 +12,14 @@ import scala.concurrent.Future
 
 private object TestModel
 
-class ModelOrResultTest extends FlatSpec with Matchers with ExecutionContexts with implicits.Dates{
+class ModelOrResultTest extends FlatSpec with Matchers with ExecutionContexts {
 
   implicit val request: RequestHeader = TestRequest()
 
   val testContent = Content(id = "the/id",
     sectionId = None,
     sectionName = None,
-    webPublicationDate = Some(DateTime.now().toCapi),
+    webPublicationDate = Some(DateTime.now().toCapiDateTime),
     webTitle = "the title",
     webUrl = "http://www.guardian.co.uk/canonical",
     apiUrl = "http://foo.bar",
