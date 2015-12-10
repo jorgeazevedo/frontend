@@ -1,17 +1,15 @@
 package commercial
 
+import commercial.feeds._
 import common.{AkkaAsync, ExecutionContexts, Jobs, Logging}
-import conf.CommercialConfiguration
 import conf.Configuration.commercial.merchandisingFeedsRoot
-import conf.switches.Switches.JobFeedSwitch
 import model.commercial.books.BestsellersAgent
 import model.commercial.jobs.{Industries, JobsAgent}
 import model.commercial.masterclasses.{MasterClassAgent, MasterClassTagsAgent}
 import model.commercial.money.BestBuysAgent
-import model.commercial.soulmates.SoulmatesAgent
+import model.commercial.soulmates._
 import model.commercial.travel.{Countries, TravelOffersAgent}
 import model.diagnostics.CloudWatch
-import org.joda.time.{DateTime, DateTimeZone}
 import play.api.{Application => PlayApp, GlobalSettings}
 import services.S3
 
@@ -21,23 +19,27 @@ import scala.util.{Failure, Random, Success}
 
 trait CommercialLifecycle extends GlobalSettings with Logging with ExecutionContexts {
 
-  private val feedFetchers: Seq[FeedFetcher] = {
-    def maybeJobsUrl = {
-
-      /*
-       * Using offset time because this appears to be how the URL is constructed.
-       * With UTC time we lose the feed for 2 hours at midnight every day.
-       */
-      val feedDate = new DateTime(DateTimeZone.forOffsetHours(-2)).toString("yyyy-MM-dd")
-
-      val urlTemplate = CommercialConfiguration.getProperty("jobs.api.url.template")
-      urlTemplate map (_ replace("yyyy-MM-dd", feedDate))
-    }
-
-    maybeJobsUrl.foldLeft(Seq.empty[FeedFetcher]) {
-      (soFar, url) => soFar :+ new FeedFetcher("Jobs", url, Map.empty, 5.seconds, JobFeedSwitch, "UTF-8")
-    }
-  }
+  private val feedFetchers: Seq[FeedFetcher] = Seq(
+    FeedFetcher.jobs(),
+    FeedFetcher.soulmates(MaleSoulmatesFeed),
+    FeedFetcher.soulmates(NewMenSoulmatesFeed),
+    FeedFetcher.soulmates(FemaleSoulmatesFeed),
+    FeedFetcher.soulmates(NewWomenSoulmatesFeed),
+    FeedFetcher.soulmates(BrightonSoulmatesFeed),
+    FeedFetcher.soulmates(NorthwestSoulmatesFeed),
+    FeedFetcher.soulmates(NewNorthwestSoulmatesFeed),
+    FeedFetcher.soulmates(ScotlandSoulmatesFeed),
+    FeedFetcher.soulmates(YoungSoulmatesFeed),
+    FeedFetcher.soulmates(MatureSoulmatesFeed),
+    FeedFetcher.soulmates(WestMidlandsSoulmatesFeed),
+    FeedFetcher.soulmates(EastMidlandsSoulmatesFeed),
+    FeedFetcher.soulmates(YorkshireSoulmatesFeed),
+    FeedFetcher.soulmates(NortheastSoulmatesFeed),
+    FeedFetcher.soulmates(EastSoulmatesFeed),
+    FeedFetcher.soulmates(SouthSoulmatesFeed),
+    FeedFetcher.soulmates(SouthwestSoulmatesFeed),
+    FeedFetcher.soulmates(WalesSoulmatesFeed)
+  ).flatten
 
   private val refreshJobs: List[RefreshJob] = List(
     SoulmatesRefresh,

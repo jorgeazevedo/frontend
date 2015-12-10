@@ -11,9 +11,9 @@ import scala.concurrent.duration._
 
 trait SoulmatesFeed extends ExecutionContexts with Logging {
 
-  protected val adTypeName: String
+  def adTypeName: String
 
-  protected val path: String
+  def path: String
 
   protected lazy val maybeUrl: Option[String] = {
     CommercialConfiguration.getProperty("soulmates.api.url") map (url => s"$url/$path")
@@ -54,91 +54,109 @@ trait SoulmatesFeed extends ExecutionContexts with Logging {
 
 
 object MaleSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "Male Soulmates"
-  protected lazy val path = "popular/men"
+
+  val adTypeName = "Male Soulmates"
+  lazy val path = "popular/men"
 }
 
 object NewMenSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "New Variant Male Soulmates"
-  protected lazy val path = "popular/men?is_new=1"
+
+  val adTypeName = "New Variant Male Soulmates"
+  lazy val path = "popular/men?is_new=1"
 }
 
 object FemaleSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "Female Soulmates"
-  protected lazy val path = "popular/women"
+
+  val adTypeName = "Female Soulmates"
+  lazy val path = "popular/women"
 }
 
 object NewWomenSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "New Variant Female Soulmates"
-  protected lazy val path = "popular/women?is_new=1"
+
+  val adTypeName = "New Variant Female Soulmates"
+  lazy val path = "popular/women?is_new=1"
 }
 
 object BrightonSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "Brighton Soulmates"
-  protected lazy val path = "popular/brighton"
+
+  val adTypeName = "Brighton Soulmates"
+  lazy val path = "popular/brighton"
 }
 
 object NorthwestSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "Northwest Soulmates"
-  protected lazy val path = "popular/northwest"
+
+  val adTypeName = "Northwest Soulmates"
+  lazy val path = "popular/northwest"
 }
 
 object NewNorthwestSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "New Variant Northwest Soulmates"
-  protected lazy val path = "popular/northwest?is_new=1"
+
+  val adTypeName = "New Variant Northwest Soulmates"
+  lazy val path = "popular/northwest?is_new=1"
 }
 
 object ScotlandSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "Scotland Soulmates"
-  protected lazy val path = "popular/scotland"
+
+  val adTypeName = "Scotland Soulmates"
+  lazy val path = "popular/scotland"
 }
 
 object YoungSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "Young Soulmates"
-  protected lazy val path = "popular/young"
+
+  val adTypeName = "Young Soulmates"
+  lazy val path = "popular/young"
 }
 
 object MatureSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "Mature Soulmates"
-  protected lazy val path = "popular/mature"
+
+  val adTypeName = "Mature Soulmates"
+  lazy val path = "popular/mature"
 }
 
 object WestMidlandsSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "West Midlands Soulmates"
-  protected lazy val path = "popular/westmidlands"
+
+  val adTypeName = "West Midlands Soulmates"
+  lazy val path = "popular/westmidlands"
 }
 
 object EastMidlandsSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "East Midlands Soulmates"
-  protected lazy val path = "popular/eastmidlands"
+
+  val adTypeName = "East Midlands Soulmates"
+  lazy val path = "popular/eastmidlands"
 }
 
 object YorkshireSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "Yorkshire Soulmates"
-  protected lazy val path = "popular/yorkshire"
+
+  val adTypeName = "Yorkshire Soulmates"
+  lazy val path = "popular/yorkshire"
 }
 
 object NortheastSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "Northeast Soulmates"
-  protected lazy val path = "popular/northeast"
+
+  val adTypeName = "Northeast Soulmates"
+  lazy val path = "popular/northeast"
 }
 
 object EastSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "East Soulmates"
-  protected lazy val path = "popular/eastengland"
+
+  val adTypeName = "East Soulmates"
+  lazy val path = "popular/eastengland"
 }
 
 object SouthSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "South Soulmates"
-  protected lazy val path = "popular/south"
+
+  val adTypeName = "South Soulmates"
+  lazy val path = "popular/south"
 }
 
 object SouthwestSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "Southwest Soulmates"
-  protected lazy val path = "popular/southwest"
+
+  val adTypeName = "Southwest Soulmates"
+  lazy val path = "popular/southwest"
 }
 
 object WalesSoulmatesFeed extends SoulmatesFeed {
-  protected val adTypeName = "Wales Soulmates"
-  protected lazy val path = "popular/wales"
+
+  val adTypeName = "Wales Soulmates"
+  lazy val path = "popular/wales"
 }

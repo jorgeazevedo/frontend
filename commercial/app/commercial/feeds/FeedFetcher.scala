@@ -1,10 +1,13 @@
-package commercial
+package commercial.feeds
 
 import java.lang.System.currentTimeMillis
 import java.util.concurrent.TimeoutException
 
 import com.ning.http.client.Response
-import conf.switches.Switch
+import conf.switches.{Switch, Switches}
+import conf.{CommercialConfiguration, Configuration}
+import model.commercial.soulmates.SoulmatesFeed
+import org.joda.time.{DateTime, DateTimeZone}
 import play.api.Play.current
 import play.api.libs.ws.{WS, WSResponse}
 
@@ -74,3 +77,37 @@ sealed trait FetchException extends Exception
 final case class FetchFailure(status: Option[Int], message: String) extends FetchException
 case object FetchTimeout extends FetchException
 case object FetchSwitchedOff extends FetchException
+
+object FeedFetcher {
+
+  def jobs(): Option[FeedFetcher] = {
+    def url = {
+
+      /*
+       * Using offset time because this appears to be how the URL is constructed.
+       * With UTC time we lose the feed for 2 hours at midnight every day.
+       */
+      val feedDate = new DateTime(DateTimeZone.forOffsetHours(-2)).toString("yyyy-MM-dd")
+
+      val urlTemplate = CommercialConfiguration.getProperty("jobs.api.url.template")
+      urlTemplate map (_ replace("yyyy-MM-dd", feedDate))
+    }
+
+    url map {
+      new FeedFetcher("Jobs", _, Map.empty, 2.seconds, Switches.JobFeedSwitch, "UTF-8")
+    }
+  }
+
+  def soulmates(soulmatesFeed: SoulmatesFeed): Option[FeedFetcher] = {
+    Configuration.commercial.soulmatesApiUrl map { url =>
+      new FeedFetcher(
+        soulmatesFeed.adTypeName,
+        s"$url/${soulmatesFeed.path}",
+        Map.empty,
+        2.seconds,
+        Switches.SoulmatesFeedSwitch,
+        "UTF-8"
+      )
+    }
+  }
+}
