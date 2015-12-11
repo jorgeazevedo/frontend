@@ -75,7 +75,7 @@ object JobsRefresh extends RefreshJob {
 
   val name: String = "Jobs"
 
-  def refresh() = JobsAgent.refresh()
+  def refresh() = JobsAgent.refresh(name)
 }
 
 object MoneyBestBuysRefresh extends RefreshJob {

@@ -20,7 +20,7 @@ import scala.util.{Failure, Random, Success}
 trait CommercialLifecycle extends GlobalSettings with Logging with ExecutionContexts {
 
   private val feedFetchers: Seq[FeedFetcher] = Seq(
-    FeedFetcher.jobs(),
+    FeedFetcher.jobs,
     FeedFetcher.soulmates(MaleSoulmatesFeed),
     FeedFetcher.soulmates(NewMenSoulmatesFeed),
     FeedFetcher.soulmates(FemaleSoulmatesFeed),
@@ -74,14 +74,8 @@ trait CommercialLifecycle extends GlobalSettings with Logging with ExecutionCont
       log.info(s"Fetching $feedName feed from ${fetcher.url} ...")
       val eventualResponse = fetcher.fetch()
       eventualResponse onFailure {
-        case FetchSwitchedOff =>
-          log.warn(s"$msgPrefix failed: ${fetcher.switch.name} switch is off")
-        case FetchTimeout =>
-          log.error(s"$msgPrefix failed: timed out after ${fetcher.timeout}")
-        case FetchFailure(Some(status), message) =>
-          log.error(s"$msgPrefix failed: HTTP status $status: $message")
-        case FetchFailure(_, message) =>
-          log.error(s"$msgPrefix failed: $message")
+        case e: FetchSwitchedOff =>
+          log.warn(s"$msgPrefix failed: ${e.getMessage}")
         case NonFatal(e) =>
           log.error(s"$msgPrefix failed: ${e.getMessage}")
       }
@@ -126,7 +120,22 @@ trait CommercialLifecycle extends GlobalSettings with Logging with ExecutionCont
       }
 
       Industries.refresh() andThen {
-        case Success(_) => JobsAgent.refresh()
+
+        case Success(_) =>
+          println("*1")
+          val x = JobsAgent.refresh(FeedFetcher.jobs.map(_.feedName).getOrElse("jobs"))
+          x onFailure {
+            case NonFatal(e) =>
+              println("*2")
+              println(e)
+          }
+          x onSuccess {
+            case r =>
+              println("*3")
+              println(r.jobs.size)
+              println(r.parseDuration)
+          }
+
         case Failure(e) => log.warn(s"Failed to refresh job industries: ${e.getMessage}")
       }
 

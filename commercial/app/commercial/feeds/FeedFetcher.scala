@@ -1,7 +1,6 @@
 package commercial.feeds
 
 import java.lang.System.currentTimeMillis
-import java.util.concurrent.TimeoutException
 
 import com.ning.http.client.Response
 import conf.switches.{Switch, Switches}
@@ -57,30 +56,18 @@ class FeedFetcher(
             throw FetchFailure(Some(response.status), response.statusText)
           }
         } recoverWith {
-          case e: TimeoutException => Future.failed(FetchTimeout)
           case NonFatal(e) => Future.failed(FetchFailure(None, e.getMessage))
         }
-      } else Future.failed(FetchSwitchedOff)
+      } else Future.failed(FetchSwitchedOff(switch.name))
     }
   }
 }
 
-object DefaultResponseEncoding {
-
-  def apply(): String = "ISO-8859-1"
-}
-
-case class FetchResponse(feed: Feed, duration: Duration)
-case class Feed(content: String, contentType: String)
-
-sealed trait FetchException extends Exception
-final case class FetchFailure(status: Option[Int], message: String) extends FetchException
-case object FetchTimeout extends FetchException
-case object FetchSwitchedOff extends FetchException
-
 object FeedFetcher {
 
-  def jobs(): Option[FeedFetcher] = {
+  lazy val jobs: Option[FeedFetcher] = {
+
+    // url changes daily so cannot be val
     def url = {
 
       /*
@@ -111,3 +98,25 @@ object FeedFetcher {
     }
   }
 }
+
+object DefaultResponseEncoding {
+
+  def apply(): String = "ISO-8859-1"
+}
+
+case class FetchResponse(feed: Feed, duration: Duration)
+case class Feed(content: String, contentType: String)
+
+
+sealed abstract class FetchException(message: String) extends Exception(message)
+
+final case class FetchFailure(status: Option[Int], message: String) extends FetchException(
+  message = status match {
+    case Some(s) => s"HTTP status $status: $message"
+    case None => message
+  }
+)
+
+final case class FetchSwitchedOff(switchName: String) extends FetchException(
+  message = s"$switchName switch is off"
+)
