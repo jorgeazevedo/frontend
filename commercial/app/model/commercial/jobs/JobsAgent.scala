@@ -5,7 +5,6 @@ import common.ExecutionContexts
 import model.commercial._
 
 import scala.concurrent.Future
-import scala.util.Try
 
 object JobsAgent extends MerchandiseAgent[Job] with ExecutionContexts {
 
@@ -21,11 +20,13 @@ object JobsAgent extends MerchandiseAgent[Job] with ExecutionContexts {
     available filter (job => jobIds contains job.id)
   }
 
-  def refresh(feedName: String): Future[ParsedFeed] = {
+  def refresh(): Future[ParsedFeed[Job]] = {
 
-    def withKeywords(parsedFeed: Try[ParsedFeed]): Try[ParsedFeed] = {
+    val feedName = "jobs"
+
+    def withKeywords(parsedFeed: Future[ParsedFeed[Job]]): Future[ParsedFeed[Job]] = {
       parsedFeed map { feed =>
-        val jobs = feed.jobs map { job =>
+        val jobs = feed.contents map { job =>
           val jobKeywordIds = job.sectorIds.flatMap(Industries.forIndustry).distinct
           job.copy(keywordIdSuffixes = jobKeywordIds map Keyword.getIdSuffix)
         }
@@ -35,12 +36,10 @@ object JobsAgent extends MerchandiseAgent[Job] with ExecutionContexts {
 
     val parsedFeed = withKeywords(JobsFeed.parsedJobs(feedName))
 
-    parsedFeed map { feed =>
-      updateAvailableMerchandise(feed.jobs) map {
-        ParsedFeed(_, feed.parseDuration)
-      }
-    } getOrElse {
-      Future.fromTry(parsedFeed)
+    parsedFeed foreach { feed =>
+      updateAvailableMerchandise(feed.contents)
     }
+
+    parsedFeed
   }
 }

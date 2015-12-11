@@ -5,7 +5,7 @@ import java.lang.System.currentTimeMillis
 import com.ning.http.client.Response
 import conf.switches.{Switch, Switches}
 import conf.{CommercialConfiguration, Configuration}
-import model.commercial.soulmates.SoulmatesFeed
+import model.commercial.soulmates.{SoulmatesAgent, SoulmatesFeed}
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.Play.current
 import play.api.libs.ws.{WS, WSResponse}
@@ -37,8 +37,8 @@ class FeedFetcher(
       response.underlying[Response].getContentType
     }
 
-    switch.onInitialized flatMap { _ =>
-      if (switch.isSwitchedOn) {
+    switch.isGuaranteedSwitchedOn flatMap { reallyOn =>
+      if (reallyOn) {
 
         val start = currentTimeMillis()
         val futureResponse = WS.url(url)
@@ -53,12 +53,12 @@ class FeedFetcher(
               Duration(currentTimeMillis() - start, MILLISECONDS)
             )
           } else {
-            throw FetchFailure(Some(response.status), response.statusText)
+            throw FetchException(response.status, response.statusText)
           }
         } recoverWith {
-          case NonFatal(e) => Future.failed(FetchFailure(None, e.getMessage))
+          case NonFatal(e) => Future.failed(e)
         }
-      } else Future.failed(FetchSwitchedOff(switch.name))
+      } else Future.failed(SwitchOffException(switch.name))
     }
   }
 }
@@ -85,17 +85,22 @@ object FeedFetcher {
     }
   }
 
-  def soulmates(soulmatesFeed: SoulmatesFeed): Option[FeedFetcher] = {
-    Configuration.commercial.soulmatesApiUrl map { url =>
-      new FeedFetcher(
-        soulmatesFeed.adTypeName,
-        s"$url/${soulmatesFeed.path}",
-        Map.empty,
-        2.seconds,
-        Switches.SoulmatesFeedSwitch,
-        "UTF-8"
-      )
+  lazy val soulmates: Seq[FeedFetcher] = {
+
+    def soulmates(soulmatesFeed: SoulmatesFeed): Option[FeedFetcher] = {
+      Configuration.commercial.soulmatesApiUrl map { url =>
+        new FeedFetcher(
+          soulmatesFeed.adTypeName,
+          s"$url/${soulmatesFeed.path}",
+          Map.empty,
+          2.seconds,
+          Switches.SoulmatesFeedSwitch,
+          "UTF-8"
+        )
+      }
     }
+
+    SoulmatesAgent.agents flatMap (agent => soulmates(agent.feed))
   }
 }
 
@@ -107,16 +112,6 @@ object DefaultResponseEncoding {
 case class FetchResponse(feed: Feed, duration: Duration)
 case class Feed(content: String, contentType: String)
 
+final case class FetchException(status: Int, message: String) extends Exception(s"HTTP status $status: $message")
 
-sealed abstract class FetchException(message: String) extends Exception(message)
-
-final case class FetchFailure(status: Option[Int], message: String) extends FetchException(
-  message = status match {
-    case Some(s) => s"HTTP status $status: $message"
-    case None => message
-  }
-)
-
-final case class FetchSwitchedOff(switchName: String) extends FetchException(
-  message = s"$switchName switch is off"
-)
+final case class SwitchOffException(switchName: String) extends Exception(s"$switchName switch is off")

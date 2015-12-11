@@ -1,23 +1,23 @@
 package model.commercial.soulmates
 
+import java.lang.System._
+
+import commercial.feeds.{MissingFeedException, ParsedFeed, SwitchOffException}
 import common.{ExecutionContexts, Logging}
-import conf.CommercialConfiguration
-import conf.switches.Switches.SoulmatesFeedSwitch
-import model.commercial.{FeedMissingConfigurationException, FeedReader, FeedRequest}
-import play.api.libs.json.{JsArray, JsValue}
+import conf.Configuration.commercial.merchandisingFeedsRoot
+import conf.switches.Switches
+import play.api.libs.json.{JsArray, JsValue, Json}
+import services.S3
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.control.NonFatal
 
 trait SoulmatesFeed extends ExecutionContexts with Logging {
 
   def adTypeName: String
 
   def path: String
-
-  protected lazy val maybeUrl: Option[String] = {
-    CommercialConfiguration.getProperty("soulmates.api.url") map (url => s"$url/$path")
-  }
 
   def parse(json: JsValue): Seq[Member] = {
     json match {
@@ -35,21 +35,23 @@ trait SoulmatesFeed extends ExecutionContexts with Logging {
     }
   }
 
-  def loadAds(): Future[Seq[Member]] = {
-    maybeUrl map { url =>
-      val request = FeedRequest(
-        feedName = adTypeName,
-        switch = SoulmatesFeedSwitch,
-        url = url,
-        timeout = 10.seconds
-      )
-      FeedReader.readSeqFromJson(request)(parse)
-    } getOrElse {
-      log.warn(s"Missing URL for $adTypeName feed")
-      Future.failed(FeedMissingConfigurationException(adTypeName))
+  def parsedMembers(feedName: String): Future[ParsedFeed[Member]] = {
+    Switches.SoulmatesFeedSwitch.isGuaranteedSwitchedOn flatMap { switchedOn =>
+      if (switchedOn) {
+        val start = currentTimeMillis
+        S3.get(s"$merchandisingFeedsRoot/$feedName") map { body =>
+          val parsed = parse(Json.parse(body))
+          Future(ParsedFeed(parsed, Duration(currentTimeMillis - start, MILLISECONDS)))
+        } getOrElse {
+          Future.failed(MissingFeedException)
+        }
+      } else {
+        Future.failed(SwitchOffException(Switches.JobFeedSwitch.name))
+      }
+    } recoverWith {
+      case NonFatal(e) => Future.failed(e)
     }
   }
-
 }
 
 
