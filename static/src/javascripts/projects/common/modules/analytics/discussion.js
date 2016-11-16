@@ -34,7 +34,7 @@ define([
         var fieldsObject = assign({
             nonInteraction: true // to avoid affecting bounce rate
         }, (customDimensions || {}));
-        ga(gaTracker + '.send', 'event', 'ElementView', 'Onpage item', label, fieldsObject);
+        ga(gaTracker + '.send', 'event', 'element view', 'onpage item', label, fieldsObject);
     }
 
     track.jumpedToComments = function () {
